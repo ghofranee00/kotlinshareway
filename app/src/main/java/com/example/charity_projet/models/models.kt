@@ -54,6 +54,7 @@ data class User(
     val dateCreation: String? = null
 ){
     fun getId(): String? = idServer ?: idAlt
+
 }
 data class UserUpdateRequest(
     val firstName: String? = null,
@@ -257,11 +258,23 @@ enum class DonationStatus {
 }
 
 
+// DonationRequest.kt
 data class DonationRequest(
-    @SerializedName("postId") val postId: String? = null,
-    @SerializedName("donorId") val donorId: String? = null,
-    @SerializedName("categorie") val categorie: String,
-    @SerializedName("region") val region: String,
-    @SerializedName("details") val details: String,
-    @SerializedName("images") val images: List<String> = emptyList()
+    @SerializedName("postId")
+    val postId: String,
+
+    @SerializedName("donorId")
+    val donorId: String,
+
+    @SerializedName("categorie")
+    val categorie: String,
+
+    @SerializedName("region")
+    val region: String,
+
+    @SerializedName("details")
+    val details: String,
+
+    @SerializedName("images")
+    val images: List<String> = emptyList()
 )

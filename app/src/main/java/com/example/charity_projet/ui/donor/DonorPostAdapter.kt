@@ -19,12 +19,11 @@ class DonorPostAdapter(
 
     interface PostClickListener {
         fun onHelpClick(post: Post)
-        fun onLikeClick(post: Post)
-        fun onCommentClick(post: Post)
         fun onShareClick(post: Post)
     }
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        // Tous ces IDs existent dans le nouveau layout item_donor_post.xml
         val tvUsername: TextView = itemView.findViewById(R.id.tv_username)
         val tvDate: TextView = itemView.findViewById(R.id.tv_date)
         val tvType: TextView = itemView.findViewById(R.id.tv_type)
@@ -36,74 +35,37 @@ class DonorPostAdapter(
         val tvVideoCount: TextView = itemView.findViewById(R.id.tv_video_count)
         val buttonsLayout: LinearLayout = itemView.findViewById(R.id.buttons_layout)
         val btnHelp: Button = itemView.findViewById(R.id.btn_help)
-        val btnLike: ImageButton = itemView.findViewById(R.id.btn_like)
-        val btnComment: ImageButton = itemView.findViewById(R.id.btn_comment)
         val btnShare: ImageButton = itemView.findViewById(R.id.btn_share)
+
+        // Pas de btnLike et btnComment dans le nouveau layout
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_post, parent, false)
+            .inflate(R.layout.item_donor_post, parent, false) // Utilise le nouveau layout
         return PostViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = posts[position]
 
-        holder.tvUsername.text = post.user?.firstName ?: "Anonymous"
+        // Setup des données de base
+        holder.tvUsername.text = post.user?.firstName ?: post.user?.identifiant ?: "Anonymous"
         holder.tvDate.text = formatDate(post.dateCreation)
         holder.tvType.text = post.typeDemande ?: "General"
         holder.tvContent.text = post.contenu ?: "No content"
         holder.tvLikesCount.text = "Likes: ${post.likesCount}"
         holder.tvCommentsCount.text = "Comments: ${post.commentsCount}"
 
-        // Set button colors based on demand type
-        when (post.typeDemande?.uppercase()) {
-            "NOURRITURE" -> holder.btnHelp.setBackgroundColor(Color.parseColor("#4CAF50"))
-            "LOGEMENT" -> holder.btnHelp.setBackgroundColor(Color.parseColor("#2196F3"))
-            "SANTE" -> holder.btnHelp.setBackgroundColor(Color.parseColor("#F44336"))
-            "EDUCATION" -> holder.btnHelp.setBackgroundColor(Color.parseColor("#FF9800"))
-            "VETEMENT" -> holder.btnHelp.setBackgroundColor(Color.parseColor("#9C27B0"))
-            "ARGENT" -> holder.btnHelp.setBackgroundColor(Color.parseColor("#FFC107"))
-            else -> holder.btnHelp.setBackgroundColor(ContextCompat.getColor(holder.itemView.context, R.color.purple_500))
-        }
+        // Couleur du bouton Help selon le type
+        setupHelpButtonColor(holder.btnHelp, post.typeDemande)
 
-        // Images
-        if (post.imageUrls.isNotEmpty()) {
-            holder.ivPostImage.visibility = View.VISIBLE
-            holder.tvImageCount.visibility = View.VISIBLE
-            if (post.imageUrls.size > 1) {
-                holder.tvImageCount.text = "+${post.imageUrls.size - 1}"
-            } else {
-                holder.tvImageCount.visibility = View.GONE
-            }
-        } else {
-            holder.ivPostImage.visibility = View.GONE
-            holder.tvImageCount.visibility = View.GONE
-        }
+        // Gestion des médias
+        setupMedia(holder, post)
 
-        // Videos
-        if (post.videoUrls.isNotEmpty()) {
-            holder.tvVideoCount.visibility = View.VISIBLE
-            holder.tvVideoCount.text = "📹 ${post.videoUrls.size} video(s)"
-        } else {
-            holder.tvVideoCount.visibility = View.GONE
-        }
-
-        // Afficher les boutons pour le donor
-        holder.buttonsLayout.visibility = View.VISIBLE
-
-        // Set click listeners
+        // Listeners
         holder.btnHelp.setOnClickListener {
             listener.onHelpClick(post)
-        }
-
-        holder.btnLike.setOnClickListener {
-            listener.onLikeClick(post)
-        }
-
-        holder.btnComment.setOnClickListener {
-            listener.onCommentClick(post)
         }
 
         holder.btnShare.setOnClickListener {
@@ -111,7 +73,49 @@ class DonorPostAdapter(
         }
     }
 
+    private fun setupHelpButtonColor(button: Button, type: String?) {
+        when (type?.uppercase()) {
+            "NOURRITURE" -> button.setBackgroundColor(Color.parseColor("#4CAF50"))
+            "LOGEMENT" -> button.setBackgroundColor(Color.parseColor("#2196F3"))
+            "SANTE" -> button.setBackgroundColor(Color.parseColor("#F44336"))
+            "EDUCATION" -> button.setBackgroundColor(Color.parseColor("#FF9800"))
+            "VETEMENT" -> button.setBackgroundColor(Color.parseColor("#9C27B0"))
+            "ARGENT" -> button.setBackgroundColor(Color.parseColor("#FFC107"))
+            else -> button.setBackgroundColor(ContextCompat.getColor(button.context, R.color.purple_500))
+        }
+    }
+
+    private fun setupMedia(holder: PostViewHolder, post: Post) {
+        // Images
+        if (!post.imageUrls.isNullOrEmpty()) {
+            holder.ivPostImage.visibility = View.VISIBLE
+            if (post.imageUrls.size > 1) {
+                holder.tvImageCount.visibility = View.VISIBLE
+                holder.tvImageCount.text = "+${post.imageUrls.size - 1}"
+            } else {
+                holder.tvImageCount.visibility = View.GONE
+            }
+            // Ici vous pouvez charger l'image avec Glide/Picasso
+        } else {
+            holder.ivPostImage.visibility = View.GONE
+            holder.tvImageCount.visibility = View.GONE
+        }
+
+        // Videos
+        if (!post.videoUrls.isNullOrEmpty()) {
+            holder.tvVideoCount.visibility = View.VISIBLE
+            holder.tvVideoCount.text = "📹 ${post.videoUrls.size} video(s)"
+        } else {
+            holder.tvVideoCount.visibility = View.GONE
+        }
+    }
+
     override fun getItemCount(): Int = posts.size
+
+    fun updatePosts(newPosts: List<Post>) {
+        posts = newPosts
+        notifyDataSetChanged()
+    }
 
     private fun formatDate(date: String?): String {
         return try {
@@ -121,15 +125,10 @@ class DonorPostAdapter(
             outputFormat.format(dateObj ?: Date())
         } catch (e: Exception) {
             try {
-                date?.substring(0, 10) ?: "Unknown date"
+                date?.substring(0, 10) ?: "Date inconnue"
             } catch (e2: Exception) {
-                "Unknown date"
+                "Date inconnue"
             }
         }
-    }
-
-    fun updatePosts(newPosts: List<Post>) {
-        posts = newPosts
-        notifyDataSetChanged()
     }
 }

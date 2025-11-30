@@ -6,9 +6,14 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.charity_projet.R
+import com.example.charity_projet.api.RetrofitClient
 import com.example.charity_projet.api.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AdminHomeActivity : AppCompatActivity() {
 
@@ -35,10 +40,7 @@ class AdminHomeActivity : AppCompatActivity() {
         }
 
         findViewById<ImageButton>(R.id.btn_logout).setOnClickListener {
-            sessionManager.clearAuthToken()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
+            logoutUser()
         }
 
         // Bottom navigation
@@ -67,7 +69,33 @@ class AdminHomeActivity : AppCompatActivity() {
         val intent = Intent(this, AdminDashboardActivity::class.java)
         startActivity(intent)
     }
+    private fun logoutUser() {
+        AlertDialog.Builder(this)
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to logout?")
+            .setPositiveButton("Yes") { dialog, which ->
+                performLogout()
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
 
+    private fun performLogout() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                RetrofitClient.instance.logout()
+            } catch (e: Exception) {
+                println("Logout API error: ${e.message}")
+            }
+        }
+
+        sessionManager.clearAuthToken()
+
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
     private fun loadUsersList() {
          val intent = Intent(this, UsersActivity::class.java)
          startActivity(intent)
@@ -96,4 +124,5 @@ class AdminHomeActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
+
 }

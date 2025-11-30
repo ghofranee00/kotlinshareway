@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 
     <application
@@ -42,7 +41,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.ProfileActivity"
-            android:exported="false" />
+           />
         <activity
             android:name=".ui.EditProfileActivity"
             android:exported="false" />
@@ -81,6 +80,9 @@
             android:exported="false" />
         <activity
             android:name=".ui.donor.CreateDonationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.donor.DonorPostsActivity"
             android:exported="false" />
 
 

@@ -7,8 +7,6 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.charity_projet.R
 import com.example.charity_projet.api.RetrofitClient
 import com.example.charity_projet.api.SessionManager
@@ -22,13 +20,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 class DonorHomeActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var btnNotifications: ImageButton
     private lateinit var btnProfile: ImageButton
     private lateinit var btnLogout: ImageButton
+    private lateinit var btnHelpNow: Button
+
+    // TextViews for statistics
+    private lateinit var tvDonationsCount: TextView
+    private lateinit var tvPeopleHelped: TextView
+    private lateinit var tvFoodCount: TextView
+    private lateinit var tvHealthCount: TextView
+    private lateinit var tvEducationCount: TextView
+    private lateinit var tvClothingCount: TextView
+    private lateinit var tvHousingCount: TextView
+    private lateinit var tvMoneyCount: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,15 +44,19 @@ class DonorHomeActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
-        // Vérification d'authentification
+        // Authentication check
         checkAuthentication()
 
         initializeViews()
         setupAppBarListeners()
         setupNavigation()
+        setupHelpNowButton()
 
-        // Afficher un message de bienvenue
-        Toast.makeText(this, "Bienvenue Donateur!", Toast.LENGTH_SHORT).show()
+        // Load data
+        loadDashboardData()
+
+        // Show welcome message
+        Toast.makeText(this, "Welcome Donor!", Toast.LENGTH_SHORT).show()
     }
 
     private fun checkAuthentication() {
@@ -62,6 +74,17 @@ class DonorHomeActivity : AppCompatActivity() {
         btnNotifications = findViewById(R.id.btn_notifications)
         btnProfile = findViewById(R.id.btn_profile)
         btnLogout = findViewById(R.id.btn_logout)
+        btnHelpNow = findViewById(R.id.btn_help_now)
+
+        // Initialize statistics TextViews
+        tvDonationsCount = findViewById(R.id.tv_donations_count)
+        tvPeopleHelped = findViewById(R.id.tv_people_helped)
+        tvFoodCount = findViewById(R.id.tv_food_count)
+        tvHealthCount = findViewById(R.id.tv_health_count)
+        tvEducationCount = findViewById(R.id.tv_education_count)
+        tvClothingCount = findViewById(R.id.tv_clothing_count)
+        tvHousingCount = findViewById(R.id.tv_housing_count)
+        tvMoneyCount = findViewById(R.id.tv_money_count)
     }
 
     private fun setupAppBarListeners() {
@@ -82,8 +105,19 @@ class DonorHomeActivity : AppCompatActivity() {
 
     private fun setupNavigation() {
         findViewById<Button>(R.id.nav_home).setOnClickListener {
-            // Already on home
-            Toast.makeText(this, "Vous êtes sur la page d'accueil", Toast.LENGTH_SHORT).show()
+            // Refresh data
+            loadDashboardData()
+            Toast.makeText(this, "Home refreshed", Toast.LENGTH_SHORT).show()
+        }
+
+        findViewById<Button>(R.id.nav_posts).setOnClickListener {
+            // Open posts activity
+            val intent = Intent(this, DonorPostsActivity::class.java)
+            startActivity(intent)
+        }
+
+        findViewById<Button>(R.id.nav_donations).setOnClickListener {
+            Toast.makeText(this, "My Donations - Coming Soon", Toast.LENGTH_SHORT).show()
         }
 
         findViewById<Button>(R.id.nav_about).setOnClickListener {
@@ -92,14 +126,92 @@ class DonorHomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupHelpNowButton() {
+        btnHelpNow.setOnClickListener {
+            // Open posts activity
+            val intent = Intent(this, DonorPostsActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun loadDashboardData() {
+        val token = sessionManager.fetchAuthToken()
+        if (token == null) {
+            showToast("Not logged in")
+            return
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.instance.getAllPosts("Bearer $token")
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        val posts = response.body() ?: emptyList()
+                        updateDashboardStats(posts)
+                        showToast("${posts.size} requests available")
+                    } else {
+                        showToast("Error loading data")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showToast("Network error: ${e.message}")
+                    // Show demo data in case of error
+                    showDemoData()
+                }
+            }
+        }
+    }
+
+    private fun updateDashboardStats(posts: List<Post>) {
+        // Count posts by type
+        val foodCount = posts.count { it.typeDemande == "NOURRITURE" }
+        val healthCount = posts.count { it.typeDemande == "SANTE" }
+        val educationCount = posts.count { it.typeDemande == "EDUCATION" }
+        val clothingCount = posts.count { it.typeDemande == "VETEMENT" }
+        val housingCount = posts.count { it.typeDemande == "LOGEMENT" }
+        val moneyCount = posts.count { it.typeDemande == "ARGENT" }
+
+        val totalPosts = posts.size
+
+        // Update interface
+        tvDonationsCount.text = "0" // Replace with actual donation data
+        tvPeopleHelped.text = "0"   // Replace with actual people helped data
+
+        tvFoodCount.text = "$foodCount requests"
+        tvHealthCount.text = "$healthCount requests"
+        tvEducationCount.text = "$educationCount requests"
+        tvClothingCount.text = "$clothingCount requests"
+        tvHousingCount.text = "$housingCount requests"
+        tvMoneyCount.text = "$moneyCount requests"
+
+        // Show message if no requests
+        if (totalPosts == 0) {
+            showToast("No requests available at the moment")
+        }
+    }
+
+    private fun showDemoData() {
+        // Demo data
+        tvDonationsCount.text = "5"
+        tvPeopleHelped.text = "12"
+        tvFoodCount.text = "3 requests"
+        tvHealthCount.text = "2 requests"
+        tvEducationCount.text = "1 request"
+        tvClothingCount.text = "4 requests"
+        tvHousingCount.text = "1 request"
+        tvMoneyCount.text = "2 requests"
+    }
+
     private fun showLogoutConfirmation() {
         AlertDialog.Builder(this)
-            .setTitle("Déconnexion")
-            .setMessage("Êtes-vous sûr de vouloir vous déconnecter ?")
-            .setPositiveButton("Oui") { dialog, which ->
+            .setTitle("Logout")
+            .setMessage("Are you sure you want to logout?")
+            .setPositiveButton("Yes") { dialog, which ->
                 performLogout()
             }
-            .setNegativeButton("Non", null)
+            .setNegativeButton("No", null)
             .show()
     }
 
@@ -116,5 +228,9 @@ class DonorHomeActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

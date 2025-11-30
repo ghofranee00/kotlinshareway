@@ -11,7 +11,7 @@
         android:id="@+id/tvContenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Contenu de la demande"
+        android:text="Request content"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="État: "
+        android:text="Status:"
         android:textSize="14sp" />
 
     <TextView
@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="Par: "
+        android:text="By: "
         android:textSize="12sp"
         android:textColor="#666" />
 

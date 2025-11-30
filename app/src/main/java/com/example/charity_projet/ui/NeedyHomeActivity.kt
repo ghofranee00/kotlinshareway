@@ -24,6 +24,7 @@ class NeedyHomeActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
         setupNavigation()
+        setupWelcomeSection()
     }
 
     private fun setupNavigation() {
@@ -31,7 +32,6 @@ class NeedyHomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.nav_about).setOnClickListener {
             showAboutUsActivity()
         }
-
 
         findViewById<Button>(R.id.nav_create).setOnClickListener {
             showCreateDemandeActivity()
@@ -42,10 +42,6 @@ class NeedyHomeActivity : AppCompatActivity() {
         findViewById<Button>(R.id.nav_posts).setOnClickListener {
             showPostsActivity()
         }
-
-      /*  findViewById<Button>(R.id.nav_donations).setOnClickListener {
-            showDonationsActivity()
-        }*/
 
         // Top Bar buttons
         findViewById<ImageButton>(R.id.btn_notifications).setOnClickListener {
@@ -58,6 +54,13 @@ class NeedyHomeActivity : AppCompatActivity() {
 
         findViewById<ImageButton>(R.id.btn_logout).setOnClickListener {
             logoutUser()
+        }
+    }
+
+    private fun setupWelcomeSection() {
+        // Setup help button to go directly to CreateDemandeActivity
+        findViewById<Button>(R.id.btn_help).setOnClickListener {
+            showCreateDemandeActivity()
         }
     }
 
@@ -75,15 +78,12 @@ class NeedyHomeActivity : AppCompatActivity() {
         val intent = Intent(this, PostsActivity::class.java)
         startActivity(intent)
     }
+
     private fun showMesDemandesActivity() {
         val intent = Intent(this, MesDemandesActivity::class.java)
         startActivity(intent)
     }
- /*   private fun showDonationsActivity() {
-        val intent = Intent(this, DonationsActivity::class.java)
-        startActivity(intent)
-    }
-*/
+
     private fun showNotificationsActivity() {
         val intent = Intent(this, NotificationsActivity::class.java)
         startActivity(intent)
