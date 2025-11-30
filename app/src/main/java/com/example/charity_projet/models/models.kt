@@ -119,6 +119,7 @@ data class NotificationResponse(
     val destinataire: String? = null
 )
 
+
 // Modèle Commentaire
 data class Commentaire(
     @SerializedName("id")
