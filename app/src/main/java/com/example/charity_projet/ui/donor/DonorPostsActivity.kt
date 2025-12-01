@@ -2,6 +2,7 @@ package com.example.charity_projet.ui.donor
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -200,20 +201,43 @@ class DonorPostsActivity : AppCompatActivity(), DonorPostAdapter.PostClickListen
     }
 
     override fun onHelpClick(post: Post) {
+        // Récupérer l'ID du post - handle null case
+        val postId = post.getId() ?: run {
+            Log.e("DonorPosts", "Post ID is null! Post: $post")
+            Toast.makeText(this, "Error: Invalid post", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Log.d("DonorPosts", "onHelpClick - Post ID: $postId")
+        Log.d("DonorPosts", "Post type: ${post.typeDemande}")
+        Log.d("DonorPosts", "Post content length: ${post.contenu?.length ?: 0}")
+
         AlertDialog.Builder(this)
-            .setTitle("Help - ${post.typeDemande}")
-            .setMessage("Do you want to help with this request?\n\n${post.contenu}")
+            .setTitle("Help - ${post.typeDemande ?: "Request"}")
+            .setMessage("Do you want to help with this request?\n\n${post.contenu ?: "No content"}")
             .setPositiveButton("Yes, I want to help") { dialog, which ->
-                // Pass only post ID and essential data
-                val intent = Intent(this, CreateDonationActivity::class.java)
-                intent.putExtra("POST_ID", post.getId())
-                intent.putExtra("POST_CONTENT", post.contenu)
-                intent.putExtra("POST_TYPE", post.typeDemande)
+                // Passer les données
+                val intent = Intent(this, CreateDonationActivity::class.java).apply {
+                    putExtra("POST_ID", postId)
+                    putExtra("POST_CONTENT", post.contenu ?: "")
+                    putExtra("POST_TYPE", post.typeDemande ?: "GENERAL")
+                }
+
+                Log.d("DonorPosts", "Starting CreateDonationActivity with:")
+                Log.d("DonorPosts", "POST_ID: $postId")
+                Log.d("DonorPosts", "POST_CONTENT: ${post.contenu?.take(50)}...")
+                Log.d("DonorPosts", "POST_TYPE: ${post.typeDemande}")
+
                 startActivityForResult(intent, REQUEST_CODE_CREATE_DONATION)
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
+
+
+
+
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

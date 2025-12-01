@@ -16,7 +16,13 @@ data class LoginResponse(
     @SerializedName("expires_in")
     val expiresIn: Int?,
     @SerializedName("refresh_token")
-    val refreshToken: String?
+    val refreshToken: String?,
+    @SerializedName("user_id")
+val userId: Long?,
+@SerializedName("username")
+val username: String?,
+@SerializedName("role")
+val role: String?
 )
 
 data class RegisterRequest(

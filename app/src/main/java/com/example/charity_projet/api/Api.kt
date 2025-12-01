@@ -2,6 +2,8 @@ package com.example.charity_projet.api
 
 import com.example.charity_projet.models.*
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -189,12 +191,12 @@ interface Api {
     ): Response<ApiResponse>
 
     // 🔹 Créer une donation
-    @POST("donations")
+    @POST("api/donations") // ou @POST("donations") selon votre configuration
+    @Headers("Content-Type: application/json")
     suspend fun createDonation(
         @Header("Authorization") token: String,
-        @Body request: DonationRequest
-    ): Response<DonationDTO>
-
+        @Body donationBody: RequestBody
+    ): Response<ResponseBody>
     // 🔹 Récupérer toutes les donations de l'utilisateur
     @GET("donations/user/{userId}")
     suspend fun getUserDonations(

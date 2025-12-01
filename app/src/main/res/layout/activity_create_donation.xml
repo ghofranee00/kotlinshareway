@@ -10,6 +10,40 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- Header avec bouton retour -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="12dp"
+                android:contentDescription="Back" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Create Donation"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/purple_500"
+                android:gravity="center" />
+
+            <!-- Espaceur pour équilibrer -->
+            <View
+                android:layout_width="48dp"
+                android:layout_height="48dp" />
+
+        </LinearLayout>
+
         <!-- Post Information Card -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -95,11 +129,10 @@
                 android:textColor="#333"
                 android:layout_marginBottom="4dp" />
 
-            <EditText
-                android:id="@+id/et_region"
+            <Spinner
+                android:id="@+id/spinner_region"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:hint="Enter your region/city"
                 android:background="@drawable/edit_text_background"
                 android:padding="12dp"
                 android:layout_marginBottom="16dp" />
@@ -149,9 +182,7 @@
                 android:layout_weight="1"
                 android:text="Cancel"
                 android:textColor="@android:color/white"
-
                 android:background="@color/purple_500"
-
                 android:layout_marginEnd="8dp"
                 android:textSize="16sp" />
 

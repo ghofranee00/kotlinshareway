@@ -64,6 +64,7 @@ class LoginActivity : AppCompatActivity() {
                         val token = response.body()!!.accessToken
                         if (token != null) {
                             sessionManager.saveAuthToken(token)
+
                             navigateToMain()
                         } else {
                             Toast.makeText(this@LoginActivity, "Token non reçu", Toast.LENGTH_LONG).show()
